@@ -1,0 +1,176 @@
+/* Sticky footer styles
+-------------------------------------------------- */
+
+@import '_variables.scss';
+
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: 65px;
+}
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 60px;
+  line-height: 60px; /* Vertically center the text there */
+  background-color: #f5f5f5;
+}
+
+
+/* Custom page CSS
+-------------------------------------------------- */
+/* Not required for template or sticky footer method. */
+
+body > .container {
+  padding: 65px 15px 0;
+}
+
+.footer > .container {
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+.abs-center-x {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+
+.searchbar{
+  margin-bottom: auto;
+  margin-top: auto;
+  height: 60px;
+  background-color: $white;
+  border-radius: 30px;
+  padding: 10px;
+  }
+
+  .search_input{
+  color: black;
+  border: 0;
+  outline: 0;
+  background: none;
+  width: 0;
+  font-size: 16px;
+  caret-color:transparent;
+  line-height: 40px;
+  transition: width 0.8s linear;
+  }
+
+  .searchbar:hover > .search_input{
+  padding: 0 10px;
+  width: 650px;
+  font-size: 16px;
+  caret-color:red;
+  transition: width 0.8s linear;
+  }
+
+  .searchbar:hover > .search_icon{
+  background: $black;
+  color: white;
+  }
+
+  .search_icon{
+  height: 40px;
+  width: 40px;
+  float: right;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  color:$black;
+  margin-top: -41px;
+  }
+
+main{
+  margin-top: 120px;
+}
+.rolelist > .card:first-child {
+  margin-top: 10px;
+}
+.rolelist > .card:not(:last-child) {
+  margin-bottom: 15px;
+}
+
+.btn-circle {
+  width: 70px;
+  height: 70px;
+  padding: 10px 16px;
+  border-radius: 35px;
+  font-size: 24px;
+  line-height: 1.33;
+  text-align: center;
+  position: fixed;
+  z-index: 100;
+  bottom: 10px;
+  right: 10px
+}
+.btn-circle:hover {
+  font-size: 35px;
+  -webkit-transition: all 0.5s ease;
+	-moz-transition: all 0.5s ease;
+	-o-transition: all 0.5s ease;
+  transition: all 0.5s ease;
+}
+
+.modal-900w{
+  max-width: 80%;
+}
+
+pre {
+  background: #f4f4f4;
+  border: 1px solid #ddd;
+  border-left: 3px solid #f36d33;
+  color: #666;
+  page-break-inside: avoid;
+  font-family: monospace;
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 1.6em;
+  max-width: 100%;
+  overflow: auto;
+  padding: 1em 1.5em;
+  display: block;
+  word-wrap: break-word;
+}
+
+.forceRight{
+  position: absolute;
+  right: 20px;
+}
+.dropdownToggle{
+  padding: 10px;
+  border-radius: 10px
+}
+
+.dropdownToggle:hover{
+  -webkit-box-shadow: 0px 0px 2px 2px rgba(0,0,0,0.25); 
+  box-shadow: 0px 0px 2px 2px rgba(0,0,0,0.25);
+}
+
+
+.item{color:#48453d; margin-top:30px; overflow:hidden;}
+.block-title{color: #48453d; margin-bottom:0px; font-size:18px; margin-top: 0px; font-weight:700; text-transform:uppercase;}
+.item-content-block{padding:20px; border-top:2px solid #f6f6f2; background-color:#FFF; display:block;}
+.tags a{background-color:#000; padding:10px; color:#fff; display:inline-block; font-size:11px; text-transform:uppercase; line-height:11px; border-radius:2px; margin-bottom:5px; margin-right:2px; text-decoration:none;}
+
+
+.roleName{
+  color: #000 !important
+}
+.roleName:hover{
+  text-decoration: underline !important
+}
+
+#uncontrolled-tab-example-tabpane-readme{
+  padding: 10px;
+  max-height: 500px;
+  overflow: auto;
+}
