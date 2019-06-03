@@ -11,6 +11,8 @@ require (
 	github.com/edsrzf/mmap-go v1.0.0 // indirect
 	github.com/gorilla/mux v1.7.2
 	github.com/jinzhu/gorm v1.9.8
+	github.com/mitchellh/mapstructure v1.1.2
+	github.com/rs/cors v1.6.0
 	github.com/steveyen/gtreap v0.0.0-20150807155958-0abe01ef9be2 // indirect
 	golang.org/x/crypto v0.0.0-20190513172903-22d7a77e9e5f
 	gopkg.in/src-d/go-git.v4 v4.11.0

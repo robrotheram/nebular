@@ -6,7 +6,9 @@ import (
 	"net/http"
 
 	"encoding/json"
+
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
 // Config stores all setting about the application
@@ -17,76 +19,95 @@ type Config struct {
 }
 
 var config = Config{GitUsername: "", GitPassword: "", TmpDIR: "/tmp/repoCache"}
-
-var roles = []GalaxyRole{}
-
-func findRoleByRepo(repo string) GalaxyRole {
-	var role GalaxyRole
-	for _, erole := range roles {
-		if erole.Repo == repo {
-			role = erole
-		}
-	}
-	return role
-}
+var kv *KeyValueDB
+var handler http.Handler
 
 func GetRoles(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	roles := kv.SearchAll()
+	json.NewEncoder(w).Encode(roles)
+}
+
+func SearchRoles(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	params := mux.Vars(req)
+	roles := kv.SearchTerm(params["term"])
 	json.NewEncoder(w).Encode(roles)
 }
 
 func GetRoleById(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(findRoleByRepo(params["id"]))
+	role := kv.Get(params["id"])
+	json.NewEncoder(w).Encode(role)
 }
 
 func CreateRole(w http.ResponseWriter, req *http.Request) {
 	var role GalaxyRole
 	_ = json.NewDecoder(req.Body).Decode(&role)
 
-	if findRoleByRepo(role.Repo).Repo == role.Repo {
-		fmt.Fprintf(w, "Repo %s already exists", role.Repo)
-	} else {
-		role.cloneRepo()
-		role.getMeta()
-		role.getReadme()
-		roles = append(roles, role)
+	role.cloneRepo()
+	role.getMeta()
+	role.getReadme()
 
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(roles)
-	}
+	kv.Save(role)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(role)
 
 }
 
 func DeleteRole(w http.ResponseWriter, req *http.Request) {
-	// params := mux.Vars(req)
-	// var user User
-	// _ = json.NewDecoder(req.Body).Decode(&user)
-	// user.ID = params["id"]
-	// users = append(users, user)
+	params := mux.Vars(req)
+	id := params["id"]
+	role := kv.Get(id)
+	kv.Delete(id)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 
-	// json.NewEncoder(w).Encode(users)
+	json.NewEncoder(w).Encode(role)
+}
+
+func GetUser(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(Usr)
 }
 
 func main() {
 	fmt.Println("magic is happening on port 8081")
-	InitMigrate()
+	kv = NewKVDB("/tmp/nebular")
+
+	// kv.Save(createData("test", "docker"))
+	// kv.Save(createData("test", "jekins"))
+	// kv.Save(createData("doom", "jekins"))
+
+	// fmt.Println(kv.SearchTerm("docker"))
+	// fmt.Println(kv.SearchTerm("jekins"))
+
+	//kv.SearchAll()
 
 	router := mux.NewRouter()
 	router.HandleFunc("/roles", GetRoles).Methods("GET")
 	router.HandleFunc("/roles", CreateRole).Methods("POST")
 	router.HandleFunc("/roles/{id}", GetRoleById).Methods("GET")
+	router.HandleFunc("/search/{term}", SearchRoles).Methods("GET")
+	router.HandleFunc("/search", GetRoles).Methods("GET")
 	router.HandleFunc("/roles/{id}", DeleteRole).Methods("DELETE")
-
-	// router.HandleFunc("/roles/{id}/vote/up", VoteRoleUp).Methods("GET")
-	// router.HandleFunc("/roles/{id}/vote/down", VoteRoleDown).Methods("GET")
+	router.HandleFunc("/user", GetUser).Methods("GET")
 
 	router.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./public/"))))
 
-	log.Fatal(http.ListenAndServe(":8081", router))
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowCredentials: true,
+		AllowedMethods:   []string{"GET", "POST", "DELETE", "PUT"},
+	})
+	handler = c.Handler(router)
+
+	log.Fatal(http.ListenAndServe(":8081", handler))
 }

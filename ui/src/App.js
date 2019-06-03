@@ -1,10 +1,9 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.scss';
-import { Dropdown, Modal, Button, Form, Col, OverlayTrigger, Tooltip, Card, ListGroup, Row, Tab, Tabs, Table } from 'react-bootstrap';
+import { Dropdown, Modal, Button, Form, Col, OverlayTrigger, Tooltip, ListGroup, Row, Tab, Tabs, Table } from 'react-bootstrap';
 
+import {api} from "./api";
 
-import {roles, user} from './data'
 const Markdown = require('react-markdown')
 
 class CustomToggle extends React.Component {
@@ -22,7 +21,7 @@ class CustomToggle extends React.Component {
 
   render() {
     return (
-      <a href="" onClick={this.handleClick} className="dropdownToggle">
+      <a href="/" onClick={this.handleClick} className="dropdownToggle">
         {this.props.children}
       </a>
     );
@@ -31,7 +30,41 @@ class CustomToggle extends React.Component {
 
 
 class AddModal extends React.Component {
+
+  constructor(...args) {
+    super(...args);
+    this.default = { Server:"https://github.com", Namespace:"", Repository:"test" }
+    this.state = this.default;
+    this.handleChange = this.handleChange.bind(this);
+    this.close = this.close.bind(this);
+    this.addModel = this.addModel.bind(this);
+  }
+
+  handleChange(event) {
+    this.setState({ [event.target.name]: event.target.value });
+  }
+
+  close(){
+    this.setState(this.default)
+    this.props.onHide()
+  }
+
+  addModel(){
+    let _this = this;
+    api.create({
+      "Server": this.state.Server,
+      "Namespace": this.state.Namespace,
+      "Repo": this.state.Repository
+    }).then(data =>{ 
+      console.log(data)
+      _this.props.refresh()
+      _this.props.onHide()
+
+    })
+  }
+
   render() {
+
     return (
       <Modal
         {...this.props}
@@ -44,25 +77,25 @@ class AddModal extends React.Component {
           <Form.Row>
             <Col>
               <OverlayTrigger key='top' placement='top' overlay={<Tooltip id={`tooltip-top`}>https://github.com</Tooltip>}>
-                <Form.Control placeholder="Server" />
+                <Form.Control placeholder="https://github.com" name="Server" value={this.state.Server} onChange={this.handleChange} />
               </OverlayTrigger>
             </Col>
             <Col>
               <OverlayTrigger key='top' placement='top' overlay={<Tooltip id={`tooltip-top`}>galaxy</Tooltip>}>
-                <Form.Control placeholder="Namespace" />
+                <Form.Control placeholder="Namespace" name="Namespace" value={this.state.Namespace} onChange={this.handleChange} />
               </OverlayTrigger>
             </Col>
             <Col>
               <OverlayTrigger key='top' placement='top' overlay={<Tooltip id={`tooltip-top`}>ansible-role</Tooltip>}>
-                <Form.Control placeholder="Repository" />
+                <Form.Control placeholder="Repository" name="Repository" value={this.state.Repository} onChange={this.handleChange} />
               </OverlayTrigger>
             </Col>
           </Form.Row>
         </Form>
         </Modal.Body>
         <Modal.Footer>
-        <Button variant="primary" type="submit" block>Submit</Button>
-          <Button onClick={this.props.onHide}>Close</Button>
+        <Button variant="primary" type="submit" onClick={this.addModel} block>Submit</Button>
+          <Button onClick={this.close}>Close</Button>
         </Modal.Footer>
       </Modal>
     );
@@ -72,8 +105,13 @@ class AddModal extends React.Component {
 
 class RepoDetails extends React.Component {
   render() {
-    const input = 'How aboutaboutaboutaboutaboutabout some code? \n \n How aboutaboutaboutaboutaboutabout some code? \n \n How aboutaboutaboutaboutaboutabout some code? \n \n How aboutaboutaboutaboutaboutabout some code? \n \n How aboutaboutaboutaboutaboutabout some code? \n \n How aboutaboutaboutaboutaboutabout some code? \n \n How aboutaboutaboutaboutaboutabout some code? \n \n How aboutaboutaboutaboutaboutabout some code? \n \n How aboutaboutaboutaboutaboutabout some code? \n \n How aboutaboutaboutaboutaboutabout some code? \n \n How aboutaboutaboutaboutaboutabout some code? \n \n How aboutaboutaboutaboutaboutabout some code? \n \n How aboutaboutaboutaboutaboutabout some code? \n \n How aboutaboutaboutaboutaboutabout some code? \n \n How aboutaboutaboutaboutaboutabout some code? \n \n How aboutaboutaboutaboutaboutabout some code? \n \n How aboutaboutaboutaboutaboutabout some code? \n \n How aboutaboutaboutaboutaboutabout some code? \n \n ## How about some code? \n ```js \n var React = \n  \n React.render(\n  <Markdown source="# Your markdown here" />,\n document.getElementById \n);\n```\n some node code'
     const url = this.props.data.Server+'/'+this.props.data.Namespace+'/'+this.props.data.Repo
+    let tags = []
+    console.log(this.props.data)
+    if((this.props.data.Meta.GalaxyInfo.GalaxyTags !== undefined)&&(this.props.data.Meta.GalaxyInfo.GalaxyTags !== null)){
+      tags = this.props.data.Meta.GalaxyInfo.GalaxyTags
+    }
+
     return (
       <Modal
         {...this.props}
@@ -117,21 +155,22 @@ class RepoDetails extends React.Component {
               <Col>
                 <h5>Dependancies</h5>
                 <ListGroup>
-                  <ListGroup.Item>Cras justo odio</ListGroup.Item>
-                  <ListGroup.Item>Dapibus ac facilisis in</ListGroup.Item>
-                  <ListGroup.Item>Morbi leo risus</ListGroup.Item>
-                  <ListGroup.Item>Porta ac consectetur ac</ListGroup.Item>
-                  <ListGroup.Item>Vestibulum at eros</ListGroup.Item>
+                {this.props.data.Meta.Dependencies.map((dependency, i) => (
+                  <ListGroup.Item key={i}>{dependency}</ListGroup.Item>
+                ), this)}
                 </ListGroup>
               </Col>
               <Col>
                 <h5>Versions</h5>
                 <ListGroup>
-                  <ListGroup.Item>Cras justo odio</ListGroup.Item>
-                  <ListGroup.Item>Dapibus ac facilisis in</ListGroup.Item>
-                  <ListGroup.Item>Morbi leo risus</ListGroup.Item>
-                  <ListGroup.Item>Porta ac consectetur ac</ListGroup.Item>
-                  <ListGroup.Item>Vestibulum at eros</ListGroup.Item>
+                {this.props.data.Meta.GalaxyInfo.Platforms.map((dependency, i) => (
+                  <ListGroup.Item key={i}>
+                    {dependency.Name}: 
+                    {dependency.Versions.map((v, j) => (
+                      <i key={j}> {v} </i>
+                    ))}
+                  </ListGroup.Item>
+                ), this)}
                 </ListGroup>
               </Col>
             </Row>
@@ -142,9 +181,9 @@ class RepoDetails extends React.Component {
           </Tabs>
         </Modal.Body>
         <Modal.Footer>
-        <div class="tags">
-        {this.props.data.Meta.GalaxyInfo.GalaxyTags.map((tag, i) => (
-          <a href="#">{tag}</a>
+        <div className="tags">
+        {tags.map((tag, i) => (
+          <i key={i}>{tag}</i>
         ))}
     	
     </div>
@@ -158,46 +197,113 @@ class App extends React.Component {
   constructor(...args) {
     super(...args);
 
-    this.state = { modalShow: false, modalAddShow: false, data:{Meta:{GalaxyInfo:{GalaxyTags:[]}}} };
+    this.state = { 
+      roles: [], 
+      search:"", 
+      user:{username:""},
+      modalShow: false, 
+      modalAddShow: false, 
+      data:{
+        Meta:{
+          Dependencies: [],
+          GalaxyInfo:{
+            Platforms: [],
+            GalaxyTags:[]
+          }
+        }
+      }
+    };
+    this.handleChange = this.handleChange.bind(this);
+    this.getRoles = this.getRoles.bind(this);
   }
+
+  getRoles(){
+    api.getAll().then( data =>{
+      this.setState({roles:data})
+    }
+    )
+  }
+
+  search(){
+    api.search(this.state.search).then( data =>{
+      this.setState({roles:data})
+    })
+  }
+
+  user(){
+    api.user().then( data =>{
+      this.setState({user:data})
+    })
+  }
+  componentDidMount() {
+    this.getRoles();
+    this.user();
+  } 
+
+  handleChange(event) {
+    if(event === undefined){return}
+    this.setState({search: event.target.value});
+    console.log(event.target.value)
+    if(event.target.value===""){
+      api.getAll().then( data =>{
+        this.setState({roles:data})
+      })
+    }else{
+      api.search(event.target.value).then( data =>{
+        this.setState({roles:data})
+      })
+    }
+    
+  }
+
+  delete(id){
+    let _this = this;
+    console.log("delteing", id)
+    api.delete(id).then(data =>{
+      console.log(data)
+      _this.getRoles()
+    }) 
+  }
+
 
   render() {
     let modalClose = () => this.setState({ modalShow: false });
     let modalAddClose = () => this.setState({ modalAddShow: false });
+    let user = this.state.user
     return (
     <div>
       <header>
-      <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top ">
-        <div class="d-flex w-50 order-0">
-            <a class="navbar-brand mr-1" href="#">Nebular</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsingNavbar">
-                <span class="navbar-toggler-icon"></span>
+      <nav className="navbar navbar-expand-lg navbar-dark bg-primary fixed-top ">
+        <div className="d-flex w-50 order-0">
+            <a className="navbar-brand mr-1" href="/">Nebular</a>
+            <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsingNavbar">
+                <span className="navbar-toggler-icon"></span>
             </button>
         </div>
-        <div class="navbar-collapse collapse justify-content-center order-2" id="collapsingNavbar">
-        <div class="d-flex justify-content-center h-100">
-        <div class="searchbar">
-          <input class="search_input" type="text" name="" placeholder="Search..."/>
-          <a href="#" class="search_icon"><i class="fas fa-search"></i></a>
+        <div className="navbar-collapse collapse justify-content-center order-2" id="collapsingNavbar">
+        <div className="d-flex justify-content-center h-100">
+        <div className="searchbar">
+          <input className="search_input" type="text" name="search" placeholder="Search..." value={this.state.search} onChange={this.handleChange} />
+          <a href="/" className="search_icon"><i className="fas fa-search"></i></a>
         </div>
       </div>
         </div>
-        <div class="mt-1 w-50 text-right order-1 order-md-last">{user.username}</div>
+        <div className="mt-1 w-50 text-right order-1 order-md-last">{user.username}</div>
     </nav>
       </header>
 
-    <main role="main" class="container">
-      <button type="button" onClick={() => this.setState({ modalAddShow: true })} class="btn btn-primary btn-circle"><i class="fa fa-plus"></i></button>
+    <main role="main" className="container">
+      <button type="button" onClick={() => this.setState({ modalAddShow: true })} className="btn btn-primary btn-circle"><i className="fa fa-plus"></i></button>
 
         <RepoDetails show={this.state.modalShow} onHide={modalClose} data={this.state.data}/>
-        <AddModal show={this.state.modalAddShow} onHide={modalAddClose} />
+        <AddModal show={this.state.modalAddShow} onHide={modalAddClose} refresh={this.getRoles}/>
     
   
 
       <div className="rolelist">
-            {roles.map((repo, i) => (
-               <div class="card" >
-               <div class="card-body">
+            {this.state.roles.map((repo, i) => (
+               <div className="card" key={i} >
+               <div className="card-body">
                <Row>
                <Col>
                 <a className="roleName" onClick={() => this.setState({ modalShow: true, data:repo })}>{repo.Namespace}.{repo.Repo}</a>
@@ -205,10 +311,10 @@ class App extends React.Component {
                <div className="forceRight">
                <Dropdown>
                 <Dropdown.Toggle as={CustomToggle} id="dropdown-custom-components">
-                <i class="fa fa-ellipsis-v"></i>
+                <i className="fa fa-ellipsis-v"></i>
                 </Dropdown.Toggle>
                     <Dropdown.Menu>
-                    <Dropdown.Item href="#/action-1">Delete Role</Dropdown.Item>
+                    <Dropdown.Item onClick={() => this.delete(repo.ID)}>Delete Role</Dropdown.Item>
                     <Dropdown.Item href="#/action-2">Refresh Role</Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown> 
@@ -216,14 +322,14 @@ class App extends React.Component {
                </Row>
                </div>
                </div>
-              ))}
+              ), this)}
      </div>
 
     </main>
 
-    <footer class="footer">
-      <div class="container">
-        <span class="text-muted">Nebular crated by @robrobotheram</span>
+    <footer className="footer">
+      <div className="container">
+        <span className="text-muted">Nebular crated by @robrobotheram</span>
       </div>
     </footer>
   </div>

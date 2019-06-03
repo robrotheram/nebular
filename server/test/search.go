@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -10,6 +9,7 @@ import (
 	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/document"
 	"github.com/blevesearch/bleve/index/scorch"
+	"github.com/mitchellh/mapstructure"
 )
 
 type GalaxyMeta struct {
@@ -28,12 +28,9 @@ type GalaxyMeta struct {
 	} `yaml:"galaxy_info"`
 }
 
-type UserVotes struct {
-	username string
-	vote     string
-}
-
+z
 type GalaxyRole struct {
+	ID		  string	 `json:"ID"`
 	Namespace string     `json:"Namespace"`
 	Meta      GalaxyMeta `json:"Meta"`
 	Rated     int        `json:"Rated"`
@@ -41,6 +38,14 @@ type GalaxyRole struct {
 	Repo      string     `json:"Repo"`
 	Server    string     `json:"Server"`
 }
+
+
+
+
+
+
+
+
 
 func createData(namespace string, repo string) GalaxyRole {
 	return GalaxyRole{
@@ -50,23 +55,13 @@ func createData(namespace string, repo string) GalaxyRole {
 	}
 }
 
-func getBleveDocsFromSearchResults(
-	results *bleve.SearchResult,
-	index bleve.Index,
-) [][]byte {
-	docs := make([][]byte, 0)
-
+func getDocsFromSearchResults(results *bleve.SearchResult, index bleve.Index) []GalaxyRole {
+	docs := make([]GalaxyRole, 0)
 	for _, val := range results.Hits {
 		id := val.ID
 		doc, _ := index.Document(id)
-
-		rv := struct {
-			ID     string                 `json:"id"`
-			Fields map[string]interface{} `json:"fields"`
-		}{
-			ID:     id,
-			Fields: map[string]interface{}{},
-		}
+		fields := map[string]interface{}{}
+		
 		for _, field := range doc.Fields {
 			var newval interface{}
 			switch field := field.(type) {
@@ -83,48 +78,42 @@ func getBleveDocsFromSearchResults(
 					newval = d.Format(time.RFC3339Nano)
 				}
 			}
-			existing, existed := rv.Fields[field.Name()]
+			existing, existed := fields[field.Name()]
 			if existed {
 				switch existing := existing.(type) {
 				case []interface{}:
-					rv.Fields[field.Name()] = append(existing, newval)
+					fields[field.Name()] = append(existing, newval)
 				case interface{}:
 					arr := make([]interface{}, 2)
 					arr[0] = existing
 					arr[1] = newval
-					rv.Fields[field.Name()] = arr
+					fields[field.Name()] = arr
 				}
 			} else {
-				rv.Fields[field.Name()] = newval
+				fields[field.Name()] = newval
 			}
 		}
-		j2, _ := json.Marshal(rv.Fields)
-		docs = append(docs, j2)
+		role := GalaxyRole{}
+		mapstructure.Decode(fields, &role)	
+		role.ID = id
+		docs = append(docs, role)
 	}
-
 	return docs
 }
 
 func search(keyword string, idx bleve.Index) {
 	q := bleve.NewTermQuery(keyword)
 	req := bleve.NewSearchRequest(q)
-	//req.Fields = []string{"*"}
-	//req.Highlight = bleve.NewHighlightWithStyle(ansi.Name)
-	//req.Explain = true
 	res, err := idx.Search(req)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	d := getBleveDocsFromSearchResults(res, idx)
+	d := getDocsFromSearchResults(res, idx)
 	for _, data := range d {
-
-		s := string(data)
-		data := GalaxyRole{}
-		json.Unmarshal([]byte(s), &data)
-		fmt.Printf("Operation: %s \n", data.Repo)
+		fmt.Println(data)
 	}
 }
+
 
 func main() {
 	os.RemoveAll("/tmp/scorch")
@@ -167,3 +156,19 @@ func main() {
 	}
 
 }
+
+
+
+
+
+
+/*
+KV Datastore
+Setup
+CreateDocument
+EditDocument
+DeleteDocument
+GetDocument
+Search
+
+
