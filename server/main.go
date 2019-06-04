@@ -45,6 +45,18 @@ func GetRoleById(w http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(w).Encode(role)
 }
 
+func UpdateRole(w http.ResponseWriter, req *http.Request) {
+	params := mux.Vars(req)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	role := kv.Get(params["id"])
+	role.cloneRepo()
+	role.getMeta()
+	role.getReadme()
+	kv.Save(role)
+	json.NewEncoder(w).Encode(role)
+}
+
 func CreateRole(w http.ResponseWriter, req *http.Request) {
 	var role GalaxyRole
 	_ = json.NewDecoder(req.Body).Decode(&role)
@@ -92,12 +104,14 @@ func main() {
 	//kv.SearchAll()
 
 	router := mux.NewRouter()
+	router.HandleFunc("/roles/update/{id}", UpdateRole).Methods("GET")
+	router.HandleFunc("/roles/{id}", GetRoleById).Methods("GET")
+	router.HandleFunc("/roles/{id}", DeleteRole).Methods("DELETE")
 	router.HandleFunc("/roles", GetRoles).Methods("GET")
 	router.HandleFunc("/roles", CreateRole).Methods("POST")
-	router.HandleFunc("/roles/{id}", GetRoleById).Methods("GET")
 	router.HandleFunc("/search/{term}", SearchRoles).Methods("GET")
 	router.HandleFunc("/search", GetRoles).Methods("GET")
-	router.HandleFunc("/roles/{id}", DeleteRole).Methods("DELETE")
+
 	router.HandleFunc("/user", GetUser).Methods("GET")
 
 	router.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./public/"))))
