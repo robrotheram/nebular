@@ -31,6 +31,12 @@ class API {
             return (response.data)
         })
     }
+    update(id){
+        return axios.get(this.baseurl+"/roles/update/"+id).then(response => {            
+            // returning the data here allows the caller to get it through another .then(...)
+            return (response.data)
+        })
+    }
     user(){
         return axios.get(this.baseurl+"/user").then(response => {
             // returning the data here allows the caller to get it through another .then(...)

@@ -1,5 +1,5 @@
 import React from 'react';
-import './App.scss';
+import './App.css';
 import { Dropdown, Modal, Button, Form, Col, OverlayTrigger, Tooltip, ListGroup, Row, Tab, Tabs, Table } from 'react-bootstrap';
 
 import {api} from "./api";
@@ -115,7 +115,7 @@ class RepoDetails extends React.Component {
     return (
       <Modal
         {...this.props}
-        dialogClassName="modal-900w"
+        dialogClassName="modal-900w modal-height"
         aria-labelledby="contained-modal-title-vcenter"
         centered
       >
@@ -153,7 +153,7 @@ class RepoDetails extends React.Component {
             <hr/>
             <Row>
               <Col>
-                <h5>Dependancies</h5>
+                <h5>Dependancies:</h5>
                 <ListGroup>
                 {this.props.data.Meta.Dependencies.map((dependency, i) => (
                   <ListGroup.Item key={i}>{dependency}</ListGroup.Item>
@@ -161,32 +161,33 @@ class RepoDetails extends React.Component {
                 </ListGroup>
               </Col>
               <Col>
-                <h5>Versions</h5>
+                <h5>Versions:</h5>
                 <ListGroup>
                 {this.props.data.Meta.GalaxyInfo.Platforms.map((dependency, i) => (
                   <ListGroup.Item key={i}>
                     {dependency.Name}: 
+                    <span className="version">
                     {dependency.Versions.map((v, j) => (
                       <i key={j}> {v} </i>
                     ))}
+                    </span>
                   </ListGroup.Item>
                 ), this)}
                 </ListGroup>
               </Col>
             </Row>
             </Tab>
-            <Tab eventKey="readme" title="ReadMe">
+            <Tab eventKey="readme" title="ReadMe" className="readme">
                   <Markdown source={this.props.data.Readme} />
             </Tab>
           </Tabs>
         </Modal.Body>
         <Modal.Footer>
         <div className="tags">
-        {tags.map((tag, i) => (
-          <i key={i}>{tag}</i>
-        ))}
-    	
-    </div>
+          {tags.map((tag, i) => (
+            <i key={i}>{tag}</i>
+          ))}
+        </div>
         </Modal.Footer>
       </Modal>
     );
@@ -258,13 +259,21 @@ class App extends React.Component {
 
   delete(id){
     let _this = this;
-    console.log("delteing", id)
+    console.log("deleting", id)
     api.delete(id).then(data =>{
       console.log(data)
       _this.getRoles()
     }) 
   }
 
+  update(id){
+    let _this = this;
+    console.log("updating", id)
+    api.update(id).then(data =>{
+      console.log(data)
+      _this.getRoles()
+    }) 
+  }
 
   render() {
     let modalClose = () => this.setState({ modalShow: false });
@@ -276,19 +285,16 @@ class App extends React.Component {
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary fixed-top ">
         <div className="d-flex w-50 order-0">
             <a className="navbar-brand mr-1" href="/">Nebular</a>
-            <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsingNavbar">
-                <span className="navbar-toggler-icon"></span>
-            </button>
         </div>
-        <div className="navbar-collapse collapse justify-content-center order-2" id="collapsingNavbar">
+        <div className="justify-content-center order-2" id="collapsingNavbar">
         <div className="d-flex justify-content-center h-100">
         <div className="searchbar">
           <input className="search_input" type="text" name="search" placeholder="Search..." value={this.state.search} onChange={this.handleChange} />
-          <a href="/" className="search_icon"><i className="fas fa-search"></i></a>
+          <a href="/" className="search_icon"><i className="fa fa-search"></i></a>
         </div>
       </div>
         </div>
-        <div className="mt-1 w-50 text-right order-1 order-md-last">{user.username}</div>
+        <div className="mt-1 w-50 text-right order-1 order-md-last text-white">{user.username}</div>
     </nav>
       </header>
 
@@ -306,7 +312,9 @@ class App extends React.Component {
                <div className="card-body">
                <Row>
                <Col>
-                <a className="roleName" onClick={() => this.setState({ modalShow: true, data:repo })}>{repo.Namespace}.{repo.Repo}</a>
+                <a className="roleName" onClick={() => this.setState({ modalShow: true, data:repo })}>
+                {repo.Namespace}.{repo.Repo} | {repo.Meta.GalaxyInfo.Description}
+                </a>
                </Col>
                <div className="forceRight">
                <Dropdown>
@@ -315,7 +323,7 @@ class App extends React.Component {
                 </Dropdown.Toggle>
                     <Dropdown.Menu>
                     <Dropdown.Item onClick={() => this.delete(repo.ID)}>Delete Role</Dropdown.Item>
-                    <Dropdown.Item href="#/action-2">Refresh Role</Dropdown.Item>
+                    <Dropdown.Item onClick={() => this.update(repo.ID)}>Refresh Role</Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown> 
                </div>

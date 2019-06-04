@@ -1,9 +1,6 @@
 /* Sticky footer styles
 -------------------------------------------------- */
 
-@import '_variables.scss';
-
-
 html {
   position: relative;
   min-height: 100%;
@@ -47,7 +44,7 @@ body > .container {
   margin-bottom: auto;
   margin-top: auto;
   height: 60px;
-  background-color: $white;
+  background-color: white;
   border-radius: 30px;
   padding: 10px;
   }
@@ -73,7 +70,7 @@ body > .container {
   }
 
   .searchbar:hover > .search_icon{
-  background: $black;
+  background: black;
   color: white;
   }
 
@@ -85,7 +82,7 @@ body > .container {
   justify-content: center;
   align-items: center;
   border-radius: 50%;
-  color:$black;
+  color: black;
   margin-top: -41px;
   }
 
@@ -145,8 +142,8 @@ pre {
   position: absolute;
   right: 20px;
 }
-.dropdownToggle{
-  padding: 10px;
+.dropdownToggle{@import '_bootswatch.css';
+  padding: 10px;@import '_bootswatch.css';
   border-radius: 10px
 }
 
@@ -159,8 +156,25 @@ pre {
 .item{color:#48453d; margin-top:30px; overflow:hidden;}
 .block-title{color: #48453d; margin-bottom:0px; font-size:18px; margin-top: 0px; font-weight:700; text-transform:uppercase;}
 .item-content-block{padding:20px; border-top:2px solid #f6f6f2; background-color:#FFF; display:block;}
+
 .tags i{background-color:#000; padding:10px; color:#fff; display:inline-block; font-size:11px; text-transform:uppercase; line-height:11px; border-radius:2px; margin-bottom:5px; margin-right:2px; text-decoration:none;}
 
+.version {
+  float: right;
+}
+.version i{
+  background-color: #1F9BCF ; 
+  padding:10px; 
+  color:#fff; 
+  display:inline-block; 
+  font-size:11px;
+  text-transform:uppercase;
+  line-height:11px; 
+  border-radius:2px;
+  margin-bottom:5px;
+  margin-right:10px;
+  text-decoration:none;
+}
 
 .roleName{
   color: #000 !important
@@ -170,7 +184,26 @@ pre {
 }
 
 #uncontrolled-tab-example-tabpane-readme{
-  padding: 10px;
-  max-height: 500px;
+  padding: 30px;
+  box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.75) inset;
+  -webkit-box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.75) inset;
+  -moz-box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.75) inset;
+}
+
+
+.nav-tabs .nav-link.active {
+  background-color: #1F9BCF ;
+  color: white;
+
+}
+.nav-tabs .nav-link {
+  margin-right: 0px;
+  border-top-right-radius: 10px;
+  border-top-left-radius: 10px;
+}
+
+.modal-content{
+  max-height: 550px;
   overflow: auto;
+  z-index: 100;
 }
