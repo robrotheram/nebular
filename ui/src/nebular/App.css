@@ -52,6 +52,7 @@ body > .container {
   .search_input{
   color: black;
   border: 0;
+  text-align: center;
   outline: 0;
   background: none;
   width: 0;
@@ -72,6 +73,7 @@ body > .container {
   .searchbar:hover > .search_icon{
   background: black;
   color: white;
+  margin-top: -41px;
   }
 
   .search_icon{
@@ -83,7 +85,13 @@ body > .container {
   align-items: center;
   border-radius: 50%;
   color: black;
-  margin-top: -41px;
+  }
+
+  @-moz-document url-prefix() {
+    .search_icon {
+    
+      margin-top:-41px
+    }
   }
 
 main{
@@ -115,6 +123,7 @@ main{
 	-moz-transition: all 0.5s ease;
 	-o-transition: all 0.5s ease;
   transition: all 0.5s ease;
+  
 }
 
 .modal-900w{
@@ -185,9 +194,9 @@ pre {
 
 #uncontrolled-tab-example-tabpane-readme{
   padding: 30px;
-  box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.75) inset;
-  -webkit-box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.75) inset;
-  -moz-box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.75) inset;
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75) inset;
+  -webkit-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75) inset;
+  -moz-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75) inset;
 }
 
 

@@ -67,7 +67,7 @@
    font-size: 0.875rem;
    font-weight: 400;
    line-height: 1.5;
-   color: #919aa1;
+   color:  #0d0d0d;
    text-align: left;
    background-color: #fff;
  }
@@ -1671,7 +1671,7 @@
  .table {
    width: 100%;
    margin-bottom: 1rem;
-   color: #919aa1;
+   color: #0d0d0d;
  }
  
  .table th,

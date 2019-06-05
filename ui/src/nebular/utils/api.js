@@ -4,11 +4,17 @@ class API {
     constructor() {
         this.baseurl = ""
         if (process.env.NODE_ENV === 'development') {
-            this.baseurl = "http://localhost:8081"
+            this.baseurl = "http://localhost:8080"
         }
     }
     getAll(){
         return axios.get(this.baseurl+"/search").then(response => {
+            // returning the data here allows the caller to get it through another .then(...)
+            return (response.data)
+        })
+    }
+    settings(){
+        return axios.get(this.baseurl+"/settings").then(response => {
             // returning the data here allows the caller to get it through another .then(...)
             return (response.data)
         })
