@@ -11,14 +11,6 @@ import (
 	"github.com/rs/cors"
 )
 
-// Config stores all setting about the application
-type Config struct {
-	GitUsername string
-	GitPassword string
-	TmpDIR      string
-}
-
-var config = Config{GitUsername: "", GitPassword: "", TmpDIR: "/tmp/repoCache"}
 var kv *KeyValueDB
 var handler http.Handler
 
@@ -80,7 +72,6 @@ func DeleteRole(w http.ResponseWriter, req *http.Request) {
 	kv.Delete(id)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-
 	json.NewEncoder(w).Encode(role)
 }
 
@@ -90,18 +81,23 @@ func GetUser(w http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(w).Encode(Usr)
 }
 
+func GetSettings(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(settings{
+		GitServer:    configuration.DefaultGitServer,
+		GitNamespace: configuration.DefaultGitNamespace,
+	})
+}
+
 func main() {
-	fmt.Println("magic is happening on port 8081")
-	kv = NewKVDB("/tmp/nebular")
+	configFromFile()
+	configFromEnv()
 
-	// kv.Save(createData("test", "docker"))
-	// kv.Save(createData("test", "jekins"))
-	// kv.Save(createData("doom", "jekins"))
+	url := configuration.Hostname + ":" + configuration.Port
+	fmt.Printf("magic is happening on %s \n", url)
 
-	// fmt.Println(kv.SearchTerm("docker"))
-	// fmt.Println(kv.SearchTerm("jekins"))
-
-	//kv.SearchAll()
+	kv = NewKVDB(configuration.DbPath)
 
 	router := mux.NewRouter()
 	router.HandleFunc("/roles/update/{id}", UpdateRole).Methods("GET")
@@ -111,8 +107,11 @@ func main() {
 	router.HandleFunc("/roles", CreateRole).Methods("POST")
 	router.HandleFunc("/search/{term}", SearchRoles).Methods("GET")
 	router.HandleFunc("/search", GetRoles).Methods("GET")
+	router.HandleFunc("/settings", GetSettings).Methods("GET")
 
 	router.HandleFunc("/user", GetUser).Methods("GET")
+
+	createApi(router)
 
 	router.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./public/"))))
 
@@ -123,5 +122,5 @@ func main() {
 	})
 	handler = c.Handler(router)
 
-	log.Fatal(http.ListenAndServe(":8081", handler))
+	log.Fatal(http.ListenAndServe(url, handler))
 }

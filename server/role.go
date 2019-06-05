@@ -1,4 +1,5 @@
 package main
+
 import (
 	"fmt"
 	"io/ioutil"
@@ -10,30 +11,46 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type GalaxyMeta struct {
-	Dependencies []string `yaml:"dependencies"`
-	GalaxyInfo   struct {
-		Author            string  `yaml:"author"`
-		Description       string  `yaml:"description"`
-		Company           string  `yaml:"company"`
-		License           string  `yaml:"license"`
-		MinAnsibleVersion float64 `yaml:"min_ansible_version"`
-		Platforms         []struct {
-			Name     string   `yaml:"name"`
-			Versions []string `yaml:"versions"`
-		} `yaml:"platforms"`
-		GalaxyTags []string `yaml:"galaxy_tags"`
-	} `yaml:"galaxy_info"`
+type GalaxyInfo struct {
+	Author            string  `yaml:"author"`
+	Description       string  `yaml:"description"`
+	Company           string  `yaml:"company"`
+	License           string  `yaml:"license"`
+	MinAnsibleVersion float64 `yaml:"min_ansible_version"`
+	Platforms         []struct {
+		Name     string   `yaml:"name"`
+		Versions []string `yaml:"versions"`
+	} `yaml:"platforms"`
+	GalaxyTags []string `yaml:"galaxy_tags"`
+}
+
+type GalaxyMetaComplex struct {
+	GalaxyInfo   GalaxyInfo `yaml:"galaxy_info"`
+	Dependencies []struct {
+		Name string `yaml:"name"`
+		Src  string `yaml:"src"`
+		Scm  string `yaml:"scm"`
+	} `yaml:"dependencies"`
+}
+
+type GalaxyMetaSimple struct {
+	GalaxyInfo   GalaxyInfo `yaml:"galaxy_info"`
+	Dependencies []string   `yaml:"dependencies"`
 }
 
 type GalaxyRole struct {
-	ID		  string	 `json:"ID"`
-	Namespace string     `json:"Namespace"`
-	Meta      GalaxyMeta `json:"Meta"`
-	Rated     int        `json:"Rated"`
-	Readme    string     `json:"Readme"`
-	Repo      string     `json:"Repo"`
-	Server    string     `json:"Server"`
+	ID        string      `json:"ID"`
+	Namespace string      `json:"Namespace"`
+	MetaType  string      `json:"MetaType"`
+	Meta      interface{} `json:"Meta"`
+	Rated     int         `json:"Rated"`
+	Readme    string      `json:"Readme"`
+	Repo      string      `json:"Repo"`
+	Server    string      `json:"Server"`
+
+	Username    string `json:"username"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 func createData(namespace string, repo string) GalaxyRole {
@@ -43,9 +60,6 @@ func createData(namespace string, repo string) GalaxyRole {
 		Repo:      repo,
 	}
 }
-
-
-
 
 //CreateRole will clone a repo and parse it for meta and readme info
 // func CreateRoleStruct(server string, namespace string, repo string) *GalaxyRole {
@@ -58,7 +72,7 @@ func createData(namespace string, repo string) GalaxyRole {
 
 func (role *GalaxyRole) cloneRepo() {
 	// Clone the given repository to the given directory
-	path := fmt.Sprintf("%s/%s", config.TmpDIR, role.Repo)
+	path := fmt.Sprintf("%s/%s", configuration.GitTmpDir, role.Repo)
 	url := fmt.Sprintf("%s/%s/%s", role.Server, role.Namespace, role.Repo)
 
 	os.RemoveAll(path)
@@ -66,8 +80,8 @@ func (role *GalaxyRole) cloneRepo() {
 	Info("git clone %s %s", url, path)
 	_, err := git.PlainClone(path, false, &git.CloneOptions{
 		Auth: &http.BasicAuth{
-			Username: config.GitUsername,
-			Password: config.GitPassword,
+			Username: configuration.GitUser,
+			Password: configuration.GitPassword,
 		},
 		URL:      url,
 		Progress: os.Stdout,
@@ -93,21 +107,34 @@ func (role *GalaxyRole) cloneRepo() {
 }
 
 func (role *GalaxyRole) getMeta() *GalaxyRole {
-	path := fmt.Sprintf("%s/%s/meta/main.yml", config.TmpDIR, role.Repo)
+	path := fmt.Sprintf("%s/%s/meta/main.yml", configuration.GitTmpDir, role.Repo)
 	fmt.Println("PATH: " + path)
 	yamlFile, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Printf("yamlFile.Get err   #%v ", err)
 	}
-	err = yaml.Unmarshal(yamlFile, &role.Meta)
+	meta := GalaxyMetaComplex{}
+	err = yaml.Unmarshal(yamlFile, &meta)
 	if err != nil {
-		log.Fatalf("Unmarshal: %v", err)
+		log.Println("Unmarshal to Complex failed, trying simple")
+		meta := GalaxyMetaSimple{}
+		err = yaml.Unmarshal(yamlFile, &meta)
+		if err != nil {
+			log.Fatalf("Unmarshal: %v", err)
+		}
+		log.Println("Unmarshal to Simple completed")
+		role.MetaType = "SIMPLE"
+		role.Meta = meta
+	} else {
+		role.MetaType = "COMPLEX"
+		role.Meta = meta
 	}
+	fmt.Println(role)
 	return role
 }
 
 func (role *GalaxyRole) getReadme() *GalaxyRole {
-	path := fmt.Sprintf("%s/%s/README.md", config.TmpDIR, role.Repo)
+	path := fmt.Sprintf("%s/%s/README.md", configuration.GitTmpDir, role.Repo)
 	b, err := ioutil.ReadFile(path) // just pass the file name
 	if err != nil {
 		fmt.Print(err)

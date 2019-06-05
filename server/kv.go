@@ -53,10 +53,12 @@ type NebularDoc struct {
 	Readme    string `json:"Readme"`
 	Repo      string `json:"Repo"`
 	Server    string `json:"Server"`
+	MetaType    string  `json:"MetaType"`
 }
 
 func (role GalaxyRole) ToDoc() NebularDoc {
 	meta, _ := json.Marshal(role.Meta)
+	fmt.Println(string(meta))
 	return NebularDoc{
 		ID:        role.ID,
 		Namespace: role.Namespace,
@@ -65,21 +67,40 @@ func (role GalaxyRole) ToDoc() NebularDoc {
 		Readme:    role.Readme,
 		Repo:      role.Repo,
 		Server:    role.Server,
+		MetaType:	role.MetaType,
 	}
 }
 
+func createDescription(description string, server string, namespace string, repo string)string{
+	return fmt.Sprintf("%s | Use the following url: 'git+%s/%s/%s'",description, server, namespace, repo)
+}
+
 func (doc NebularDoc) ToRole() GalaxyRole {
-	meta := GalaxyMeta{}
-	json.Unmarshal([]byte(doc.Meta), &meta)
-	return GalaxyRole{
+	role := GalaxyRole{
 		ID:        doc.ID,
 		Namespace: doc.Namespace,
-		Meta:      meta,
 		Rated:     doc.Rated,
 		Readme:    doc.Readme,
 		Repo:      doc.Repo,
 		Server:    doc.Server,
+		MetaType: 	doc.MetaType,
+		Name: doc.Repo,
 	}
+	switch doc.MetaType {
+    case "COMPLEX":
+        meta := GalaxyMetaComplex{}
+		json.Unmarshal([]byte(doc.Meta), &meta)
+		role.Meta = meta
+		role.Username = meta.GalaxyInfo.Author
+		role.Description = createDescription(meta.GalaxyInfo.Description, doc.Server, doc.Namespace, doc.Repo)
+    case "SIMPLE":
+        meta := GalaxyMetaSimple{}
+		json.Unmarshal([]byte(doc.Meta), &meta)
+		role.Meta = meta
+		role.Username = meta.GalaxyInfo.Author
+		role.Description = createDescription(meta.GalaxyInfo.Description, doc.Server, doc.Namespace, doc.Repo)
+    }
+	return role
 }
 
 type KeyValueDB struct {
