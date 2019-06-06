@@ -5,5 +5,7 @@ git_user: ""
 git_password: ""
 git_tmp_dir: /tmp/nebular/repos
 db_path: /tmp/nebular
+user_ssh_url: true
+git_ssh_server: 'git@github.com:'
 default_git_server: http://github.com
 default_git_namespace: robrotheram
