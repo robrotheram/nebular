@@ -94,6 +94,8 @@ func GetSettings(w http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(w).Encode(settings{
 		GitServer:    configuration.DefaultGitServer,
 		GitNamespace: configuration.DefaultGitNamespace,
+		GitSSHURL:    configuration.GitSSHURL,
+		UseSSHUrl:    configuration.UseSSHUrl,
 	})
 }
 

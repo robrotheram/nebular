@@ -145,7 +145,7 @@ func RandStringRunes(n int) string {
 }
 
 func (kv *KeyValueDB) Save(role GalaxyRole) error {
-	id := fmt.Sprintf("%s-%s-%s", role.Namespace, role.Repo, RandStringRunes(5))
+	id := fmt.Sprintf("%s-%s-%s", role.Namespace, role.Repo)
 	batch := kv.idx.NewBatch()
 	err := batch.Index(id, role.ToDoc())
 	if err != nil {

@@ -19,6 +19,8 @@ type config struct {
 	GitPassword         string `yaml:"git_password"`
 	GitTmpDir           string `yaml:"git_tmp_dir"`
 	DbPath              string `yaml:"db_path"`
+	UseSSHUrl           bool   `yaml:"user_ssh_url"`
+	GitSSHURL           string `yaml:"git_ssh_server"`
 	DefaultGitServer    string `yaml:"default_git_server"`
 	DefaultGitNamespace string `yaml:"default_git_namespace"`
 }
@@ -26,6 +28,8 @@ type config struct {
 type settings struct {
 	GitServer    string `json:"git_server"`
 	GitNamespace string `json:"git_namespace"`
+	UseSSHUrl    bool   `json:"user_ssh_url"`
+	GitSSHURL    string `json:"git_SSH_URL"`
 }
 
 var defaultConfig = config{
@@ -36,6 +40,8 @@ var defaultConfig = config{
 	GitPassword:         "",
 	GitTmpDir:           "/tmp/nebular/repos",
 	DbPath:              "/tmp/nebular",
+	UseSSHUrl:           true,
+	GitSSHURL:           "git@github.com:",
 	DefaultGitServer:    "http://github.com",
 	DefaultGitNamespace: "robrotheram",
 }
@@ -46,6 +52,7 @@ var configuration config
 
 func configFromFile() {
 	//Create Sample config if it does not exists
+	configuration = defaultConfig
 	if ex, err := exists(configSamplepath); err != nil || !ex {
 		fmt.Println(defaultConfig)
 		y, err := yaml.Marshal(defaultConfig)
@@ -68,9 +75,6 @@ func configFromFile() {
 		if err != nil {
 			log.Fatalf("Unmarshal: %v", err)
 		}
-	} else {
-		fmt.Println("No Configfile found using defaults")
-		configuration = defaultConfig
 	}
 }
 
