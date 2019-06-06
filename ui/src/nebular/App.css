@@ -59,24 +59,19 @@ body > .container {
   font-size: 16px;
   caret-color:transparent;
   line-height: 40px;
-  transition: width 0.8s linear;
-  }
 
-  .searchbar:hover > .search_input{
   padding: 0 10px;
   width: 650px;
   font-size: 16px;
   caret-color:red;
-  transition: width 0.8s linear;
+
   }
 
-  .searchbar:hover > .search_icon{
-  background: black;
-  color: white;
-  margin-top: -41px;
-  }
+
 
   .search_icon{
+    background: black;
+  color: white;
   height: 40px;
   width: 40px;
   float: right;
@@ -84,7 +79,6 @@ body > .container {
   justify-content: center;
   align-items: center;
   border-radius: 50%;
-  color: black;
   }
 
   @-moz-document url-prefix() {
@@ -161,6 +155,10 @@ pre {
   box-shadow: 0px 0px 2px 2px rgba(0,0,0,0.25);
 }
 
+.table > thead > tr:first-child > td, 
+.table > tbody > tr:first-child > td {
+    border: none;
+}
 
 .item{color:#48453d; margin-top:30px; overflow:hidden;}
 .block-title{color: #48453d; margin-bottom:0px; font-size:18px; margin-top: 0px; font-weight:700; text-transform:uppercase;}
@@ -194,25 +192,65 @@ pre {
 
 #uncontrolled-tab-example-tabpane-readme{
   padding: 30px;
-  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75) inset;
-  -webkit-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75) inset;
-  -moz-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75) inset;
-}
-
-
-.nav-tabs .nav-link.active {
-  background-color: #1F9BCF ;
-  color: white;
 
 }
-.nav-tabs .nav-link {
-  margin-right: 0px;
-  border-top-right-radius: 10px;
-  border-top-left-radius: 10px;
-}
 
-.modal-content{
-  max-height: 550px;
-  overflow: auto;
+
+.tab-content{
+  max-height: 500px;
+  padding: 10px;
+  overflow-y: auto;
+  overflow-x: hidden;
   z-index: 100;
+  border-left: 1px solid #dee2e6;
+  border-bottom: 1px solid #dee2e6;
+  border-right: 1px solid #dee2e6;
 }
+
+/* 
+.searchbar{
+  margin-bottom: auto;
+  margin-top: auto;
+  height: 60px;
+  background-color: white;
+  border-radius: 30px;
+  padding: 10px;
+  }
+
+  .search_input{
+  color: black;
+  border: 0;
+  text-align: center;
+  outline: 0;
+  background: none;
+  width: 0;
+  font-size: 16px;
+  caret-color:transparent;
+  line-height: 40px;
+  transition: width 0.8s linear;
+  }
+
+  .searchbar:hover > .search_input{
+  padding: 0 10px;
+  width: 650px;
+  font-size: 16px;
+  caret-color:red;
+  transition: width 0.8s linear;
+  }
+
+  .searchbar:hover > .search_icon{
+  background: black;
+  color: white;
+  margin-top: -41px;
+  }
+
+  .search_icon{
+  height: 40px;
+  width: 40px;
+  float: right;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  color: black;
+  } */

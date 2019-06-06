@@ -4,7 +4,7 @@ class API {
     constructor() {
         this.baseurl = ""
         if (process.env.NODE_ENV === 'development') {
-            this.baseurl = "http://localhost:8080"
+            this.baseurl = "http://192.168.0.125:8080"
         }
     }
     getAll(){

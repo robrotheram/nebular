@@ -6,7 +6,7 @@ import Header from './components/header'
 import RoleDetailModal from './components/roleDetail'
 import AddRoleModal from './components/addRole'
 
-import { Dropdown, Col, Row} from 'react-bootstrap';
+import { Dropdown, Col, Row, Card} from 'react-bootstrap';
 
 
 
@@ -59,8 +59,13 @@ class Nebular extends React.Component {
     )
   }
 
-  search(){
-    api.search(this.state.search).then( data =>{
+  search = (s) =>{
+    let search = this.state.search;
+    if(s !== undefined){
+      search = s
+      this.setState({search: s});
+    }
+    api.search(search).then( data =>{
       this.setState({roles:data})
     })
   }
@@ -111,18 +116,18 @@ class Nebular extends React.Component {
     return (
     <div>
       <Header search={this.state.search} onSearch={this.handleSearch}/>
-      <RoleDetailModal show={this.state.modalShow} onHide={modalClose} data={this.state.data}/>
+      <RoleDetailModal show={this.state.modalShow} onHide={modalClose} search={this.search} data={this.state.data}/>
       <AddRoleModal show={this.state.modalAddShow} onHide={modalAddClose} refresh={this.getRoles}/>
       <button type="button" onClick={() => this.setState({ modalAddShow: true })} className="btn btn-primary btn-circle"><i className="fa fa-plus"></i></button>
       <main role="main" className="container">
         <div className="rolelist">
               {this.state.roles.map((repo, i) => (
-                <div className="card" key={i} >
+                <div className="card bg-light" key={i} >
                 <div className="card-body">
                 <Row>
                 <Col>
-                  <a className="roleName" onClick={() => this.setState({ modalShow: true, data:repo })}>
-                  {i} | {repo.Namespace}.{repo.Repo} | {repo.Meta.GalaxyInfo.Description}
+                  <a className="" onClick={() => this.setState({ modalShow: true, data:repo })}>
+                  {repo.Namespace}.{repo.Repo} | {repo.Meta.GalaxyInfo.Description}
                   </a>
                 </Col>
                 <div className="forceRight">

@@ -20,7 +20,7 @@ export default class Header extends React.Component {
     render() {
       return (
             <header>
-                <nav className="navbar navbar-expand-lg navbar-dark bg-primary fixed-top ">
+                <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top ">
                     <div className="d-flex w-50 order-0">
                         <a className="navbar-brand mr-1" href="/">Nebular</a>
                     </div>

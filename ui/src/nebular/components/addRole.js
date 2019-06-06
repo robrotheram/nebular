@@ -75,8 +75,8 @@ export default class AddRoleModal extends React.Component {
           </Form>
           </Modal.Body>
           <Modal.Footer>
-          <Button variant="primary" type="submit" onClick={this.addModel} block>Submit</Button>
-            <Button onClick={this.close}>Close</Button>
+          <Button variant="dark" type="submit" onClick={this.addModel} block>Submit</Button>
+          <Button variant="dark" onClick={this.close}>Close</Button>
           </Modal.Footer>
         </Modal>
       );
