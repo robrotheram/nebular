@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"time"
 
@@ -13,16 +14,6 @@ import (
 	"github.com/blevesearch/bleve/mapping"
 	"github.com/mitchellh/mapstructure"
 )
-
-/*
-KV Datastore
-Setup
-CreateDocument
-EditDocument
-DeleteDocument
-GetDocument
-Search
-*/
 
 func buildMapping() mapping.IndexMapping {
 	enFieldMapping := bleve.NewTextFieldMapping()
@@ -45,6 +36,7 @@ func buildMapping() mapping.IndexMapping {
 	return mapping
 }
 
+//NebularDoc stores the structure of the data in the bleve datastore
 type NebularDoc struct {
 	ID        string `json:"ID"`
 	Namespace string `json:"Namespace"`
@@ -53,7 +45,7 @@ type NebularDoc struct {
 	Readme    string `json:"Readme"`
 	Repo      string `json:"Repo"`
 	Server    string `json:"Server"`
-	MetaType    string  `json:"MetaType"`
+	MetaType  string `json:"MetaType"`
 }
 
 func (role GalaxyRole) ToDoc() NebularDoc {
@@ -67,12 +59,12 @@ func (role GalaxyRole) ToDoc() NebularDoc {
 		Readme:    role.Readme,
 		Repo:      role.Repo,
 		Server:    role.Server,
-		MetaType:	role.MetaType,
+		MetaType:  role.MetaType,
 	}
 }
 
-func createDescription(description string, server string, namespace string, repo string)string{
-	return fmt.Sprintf("%s | Use the following url: 'git+%s/%s/%s'",description, server, namespace, repo)
+func createDescription(description string, server string, namespace string, repo string) string {
+	return fmt.Sprintf("%s | Use the following url: 'git+%s/%s/%s'", description, server, namespace, repo)
 }
 
 func (doc NebularDoc) ToRole() GalaxyRole {
@@ -83,23 +75,23 @@ func (doc NebularDoc) ToRole() GalaxyRole {
 		Readme:    doc.Readme,
 		Repo:      doc.Repo,
 		Server:    doc.Server,
-		MetaType: 	doc.MetaType,
-		Name: doc.Repo,
+		MetaType:  doc.MetaType,
+		Name:      doc.Repo,
 	}
 	switch doc.MetaType {
-    case "COMPLEX":
-        meta := GalaxyMetaComplex{}
+	case "COMPLEX":
+		meta := GalaxyMetaComplex{}
 		json.Unmarshal([]byte(doc.Meta), &meta)
 		role.Meta = meta
 		role.Username = meta.GalaxyInfo.Author
 		role.Description = createDescription(meta.GalaxyInfo.Description, doc.Server, doc.Namespace, doc.Repo)
-    case "SIMPLE":
-        meta := GalaxyMetaSimple{}
+	case "SIMPLE":
+		meta := GalaxyMetaSimple{}
 		json.Unmarshal([]byte(doc.Meta), &meta)
 		role.Meta = meta
 		role.Username = meta.GalaxyInfo.Author
 		role.Description = createDescription(meta.GalaxyInfo.Description, doc.Server, doc.Namespace, doc.Repo)
-    }
+	}
 	return role
 }
 
@@ -142,8 +134,18 @@ func (kv *KeyValueDB) Close() {
 	}
 }
 
+var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func RandStringRunes(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
+}
+
 func (kv *KeyValueDB) Save(role GalaxyRole) error {
-	id := fmt.Sprintf("%s-%s", role.Namespace, role.Repo)
+	id := fmt.Sprintf("%s-%s-%s", role.Namespace, role.Repo, RandStringRunes(5))
 	batch := kv.idx.NewBatch()
 	err := batch.Index(id, role.ToDoc())
 	if err != nil {
@@ -156,10 +158,10 @@ func (kv *KeyValueDB) Save(role GalaxyRole) error {
 	return nil
 }
 
-func (kv *KeyValueDB) Edit()   {}
+func (kv *KeyValueDB) Edit() {}
 
 func (kv *KeyValueDB) Delete(id string) {
-	fmt.Println("Deleting document id: "+id)
+	fmt.Println("Deleting document id: " + id)
 	kv.idx.Delete(id)
 }
 
@@ -216,17 +218,29 @@ func (kv *KeyValueDB) SearchTerm(keyword string) []GalaxyRole {
 	return docs
 }
 
+func (kv *KeyValueDB) IndexSize() (int, error) {
+	query := bleve.NewMatchAllQuery()
+	sizeRequest := bleve.NewSearchRequest(query)
+	sizeRequest.Size = 0
+	results, err := kv.idx.Search(sizeRequest)
+	if err != nil {
+		return 0, err
+	}
+	return int(results.Total), nil
+}
+
 func (kv *KeyValueDB) SearchAll() []GalaxyRole {
 	docs := make([]GalaxyRole, 0)
 
 	q := bleve.NewMatchAllQuery()
 	req := bleve.NewSearchRequest(q)
+	req.Size, _ = kv.IndexSize()
 	res, err := kv.idx.Search(req)
 	if err != nil {
 		fmt.Println(err)
 		return docs
 	}
-
+	fmt.Println(res)
 	for _, val := range res.Hits {
 		id := val.ID
 		doc, _ := kv.idx.Document(id)

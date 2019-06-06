@@ -10,7 +10,7 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 	"gopkg.in/yaml.v2"
 )
-
+//GalaxyInfo Internal Info Struct
 type GalaxyInfo struct {
 	Author            string  `yaml:"author"`
 	Description       string  `yaml:"description"`
@@ -23,7 +23,7 @@ type GalaxyInfo struct {
 	} `yaml:"platforms"`
 	GalaxyTags []string `yaml:"galaxy_tags"`
 }
-
+//GalaxyMetaComplex Contains info with a complex dependacy format
 type GalaxyMetaComplex struct {
 	GalaxyInfo   GalaxyInfo `yaml:"galaxy_info"`
 	Dependencies []struct {
@@ -32,12 +32,13 @@ type GalaxyMetaComplex struct {
 		Scm  string `yaml:"scm"`
 	} `yaml:"dependencies"`
 }
-
+//GalaxyMetaSimple Contains info with a simple dependacy format
 type GalaxyMetaSimple struct {
 	GalaxyInfo   GalaxyInfo `yaml:"galaxy_info"`
 	Dependencies []string   `yaml:"dependencies"`
 }
 
+//GalaxyRole contains the info about a role got from meta/main.yml
 type GalaxyRole struct {
 	ID        string      `json:"ID"`
 	Namespace string      `json:"Namespace"`
@@ -61,16 +62,7 @@ func createData(namespace string, repo string) GalaxyRole {
 	}
 }
 
-//CreateRole will clone a repo and parse it for meta and readme info
-// func CreateRoleStruct(server string, namespace string, repo string) *GalaxyRole {
-// 	role := GalaxyRole{server, namespace, repo, GalaxyMeta{}, "", false, 0, []UserVotes{}}
-// 	role.cloneRepo()
-// 	role.getMeta()
-// 	role.getReadme()
-// 	return &role
-// }
-
-func (role *GalaxyRole) cloneRepo() {
+func (role *GalaxyRole) cloneRepo() error {
 	// Clone the given repository to the given directory
 	path := fmt.Sprintf("%s/%s", configuration.GitTmpDir, role.Repo)
 	url := fmt.Sprintf("%s/%s/%s", role.Server, role.Namespace, role.Repo)
@@ -88,30 +80,17 @@ func (role *GalaxyRole) cloneRepo() {
 	})
 	if err != nil {
 		fmt.Printf("\x1b[31;1m%s\x1b[0m\n", fmt.Sprintf("error: %s", err))
-		return
+		return err
 	}
-	// ... retrieving the branch being pointed by HEAD
-	//ref, err := r.Head()
-	if err != nil {
-		fmt.Printf("\x1b[31;1m%s\x1b[0m\n", fmt.Sprintf("error: %s", err))
-		return
-	}
-	// ... retrieving the commit object
-	//commit, err := r.CommitObject(ref.Hash())
-
-	if err != nil {
-		fmt.Printf("\x1b[31;1m%s\x1b[0m\n", fmt.Sprintf("error: %s", err))
-		return
-	}
-
+	return nil
 }
 
-func (role *GalaxyRole) getMeta() *GalaxyRole {
+func (role *GalaxyRole) getMeta() error {
 	path := fmt.Sprintf("%s/%s/meta/main.yml", configuration.GitTmpDir, role.Repo)
 	fmt.Println("PATH: " + path)
 	yamlFile, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Printf("yamlFile.Get err   #%v ", err)
+		return err
 	}
 	meta := GalaxyMetaComplex{}
 	err = yaml.Unmarshal(yamlFile, &meta)
@@ -120,7 +99,7 @@ func (role *GalaxyRole) getMeta() *GalaxyRole {
 		meta := GalaxyMetaSimple{}
 		err = yaml.Unmarshal(yamlFile, &meta)
 		if err != nil {
-			log.Fatalf("Unmarshal: %v", err)
+			return err
 		}
 		log.Println("Unmarshal to Simple completed")
 		role.MetaType = "SIMPLE"
@@ -129,16 +108,15 @@ func (role *GalaxyRole) getMeta() *GalaxyRole {
 		role.MetaType = "COMPLEX"
 		role.Meta = meta
 	}
-	fmt.Println(role)
-	return role
+	return nil
 }
 
-func (role *GalaxyRole) getReadme() *GalaxyRole {
+func (role *GalaxyRole) getReadme() error {
 	path := fmt.Sprintf("%s/%s/README.md", configuration.GitTmpDir, role.Repo)
 	b, err := ioutil.ReadFile(path) // just pass the file name
 	if err != nil {
-		fmt.Print(err)
+		return err
 	}
 	role.Readme = string(b)
-	return role
+	return nil
 }

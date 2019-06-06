@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
+	"time"
 
 	"encoding/json"
 
@@ -53,10 +55,15 @@ func CreateRole(w http.ResponseWriter, req *http.Request) {
 	var role GalaxyRole
 	_ = json.NewDecoder(req.Body).Decode(&role)
 
-	role.cloneRepo()
-	role.getMeta()
-	role.getReadme()
-
+	if err := role.cloneRepo(); err != nil {
+		return
+	}
+	if err := role.getMeta(); err != nil {
+		return
+	}
+	if err := role.getReadme(); err != nil {
+		return
+	}
 	kv.Save(role)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -88,6 +95,10 @@ func GetSettings(w http.ResponseWriter, req *http.Request) {
 		GitServer:    configuration.DefaultGitServer,
 		GitNamespace: configuration.DefaultGitNamespace,
 	})
+}
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
 }
 
 func main() {

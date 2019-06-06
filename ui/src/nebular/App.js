@@ -122,7 +122,7 @@ class Nebular extends React.Component {
                 <Row>
                 <Col>
                   <a className="roleName" onClick={() => this.setState({ modalShow: true, data:repo })}>
-                  {repo.Namespace}.{repo.Repo} | {repo.Meta.GalaxyInfo.Description}
+                  {i} | {repo.Namespace}.{repo.Repo} | {repo.Meta.GalaxyInfo.Description}
                   </a>
                 </Col>
                 <div className="forceRight">

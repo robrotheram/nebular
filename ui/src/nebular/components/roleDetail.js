@@ -8,10 +8,20 @@ export default class RoleDetailModal extends React.Component {
       let metaType = this.props.data.MetaType;
       const url = this.props.data.Server+'/'+this.props.data.Namespace+'/'+this.props.data.Repo
       let tags = []
+      let dependancies = []
+      let platforms = []
       console.log(this.props.data)
       if((this.props.data.Meta.GalaxyInfo.GalaxyTags !== undefined)&&(this.props.data.Meta.GalaxyInfo.GalaxyTags !== null)){
         tags = this.props.data.Meta.GalaxyInfo.GalaxyTags
       }
+      if(Array.isArray(meta.Dependencies)){
+        dependancies = meta.Dependencies;
+      }
+      if(Array.isArray(this.props.data.Meta.GalaxyInfo.Platforms)){
+        platforms = this.props.data.Meta.GalaxyInfo.Platforms
+      }
+      
+      
       
       return (
         <Modal
@@ -56,7 +66,7 @@ export default class RoleDetailModal extends React.Component {
                 <Col>
                   <h5>Dependancies:</h5>
                   <ListGroup>         
-                  {meta.Dependencies.map((dependency, i) => {
+                  {dependancies.map((dependency, i) => {
                     if (metaType === "COMPLEX"){
                       return (<ListGroup.Item key={i}><a href={dependency.Src}>{dependency.Src}</a></ListGroup.Item>)
                     } else {
@@ -68,7 +78,7 @@ export default class RoleDetailModal extends React.Component {
                 <Col>
                   <h5>Versions:</h5>
                   <ListGroup>
-                  {this.props.data.Meta.GalaxyInfo.Platforms.map((dependency, i) => (
+                  {platforms.map((dependency, i) => (
                     <ListGroup.Item key={i}>
                       {dependency.Name}: 
                       <span className="version">

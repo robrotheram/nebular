@@ -64,7 +64,7 @@ func configFromFile() {
 		if err != nil {
 			log.Printf("yamlFile.Get err   #%v ", err)
 		}
-		err = yaml.Unmarshal(yamlFile, configuration)
+		err = yaml.Unmarshal(yamlFile, &configuration)
 		if err != nil {
 			log.Fatalf("Unmarshal: %v", err)
 		}
