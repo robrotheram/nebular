@@ -79,6 +79,7 @@ body > .container {
   justify-content: center;
   align-items: center;
   border-radius: 50%;
+  margin-top: -41px;
   }
 
   @-moz-document url-prefix() {
