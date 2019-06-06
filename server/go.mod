@@ -1,4 +1,4 @@
-module gallexy
+module nebular
 
 require (
 	github.com/RoaringBitmap/roaring v0.4.17 // indirect

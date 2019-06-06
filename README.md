@@ -46,3 +46,40 @@ To start the dev server
 
 To build a production version that will get coppied to Server/public
 >npm run build
+
+###### Docker
+To build the docker image
+> docker build . -t nebular:latest
+
+
+## Running
+Nebular can be configured either by a config file placed in config/config.yaml or via enviromental varibles more ueseful if using docker
+###### File
+```
+debug: true
+port: "8080"
+hostname: ""
+git_user: ""
+git_password: ""
+git_tmp_dir: /tmp/nebular/repos
+db_path: /tmp/nebular
+user_ssh_url: true
+git_ssh_server: 'git@github.com:'
+default_git_server: http://github.com
+default_git_namespace: robrotheram
+
+```
+
+###### Environment Varibles
+```
+NEBULAR_PORT
+NEBULAR_HOSTNAME
+NEBULAR_GIT_USER
+NEBULAR_GIT_PASSWORD
+NEBULAR_GIT_TMP_DIR
+NEBULAR_DB_PATH
+NEBULAR_USER_SSH_URL
+NEBULAR_GIT_SSH_SERVER
+NEBULAR_DEFAULT_GIT_SERVER
+NEBULAR_DEFAULT_GIT_NAMESPACE
+```
